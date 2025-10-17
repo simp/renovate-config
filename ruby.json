@@ -1,0 +1,16 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Configuration for Ruby-related projects",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update environment variable defaults",
+      "managerFilePatterns": [
+        "/(^|/)Gemfile(\\.(local|project))?$/"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)(?:\\s+versioning=(?<versioning>\\S+))?\\s+.*?['\"](?<depName>[\\w_-]+)['\"].*?['\"](?<currentValue>(?:=|~>|<)?\\s*\\d+(?:\\.\\d+)*)['\"]"
+      ]
+    }
+  ]
+}
