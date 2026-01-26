@@ -11,6 +11,18 @@
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)(?:\\s+versioning=(?<versioning>\\S+))?\\s+.*?['\"](?<depName>[\\w_-]+)['\"].*?['\"](?<currentValue>(?:=|~>|<)?\\s*\\d+(?:\\.\\d+)*)['\"]"
       ]
+    },
+    {
+      "customType": "regex",
+      "description": "Update gemspec dependencies",
+      "managerFilePatterns": [
+        "/\\.gemspec$/"
+      ],
+      "matchStrings": [
+        "\\.add(?:_runtime|_development)?_dependency\\s+['\"](?<depName>[\\w_-]+)['\"].*?['\"](?<currentValue>(?:=|~>|<)?\\s*\\d+(?:\\.\\d+)*)['\"]"
+      ],
+      "datasourceTemplate": "rubygems",
+      "versioningTemplate": "ruby"
     }
   ]
 }
