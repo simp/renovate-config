@@ -1,0 +1,26 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Manage Puppet module dependency ranges in metadata.json via the Forge API",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update version_requirement ranges for Forge modules in metadata.json (assumes name precedes version_requirement, as in all puppetsync-managed modules)",
+      "managerFilePatterns": [
+        "/(^|/)metadata\\.json$/"
+      ],
+      "matchStrings": [
+        "\"name\":\\s*\"(?<depName>[\\w]+[-/][\\w]+)\",\\s*\"version_requirement\":\\s*\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "puppet-forge",
+      "versioningTemplate": "npm"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Widen metadata.json ranges (keep the floor, raise the ceiling) instead of replacing them. NOTE: requires Renovate to honor rangeStrategy for custom managers — see the PR that added this preset before extending it.",
+      "matchDatasources": ["puppet-forge"],
+      "matchManagers": ["custom.regex"],
+      "rangeStrategy": "widen"
+    }
+  ]
+}
