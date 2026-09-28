@@ -23,6 +23,18 @@
       ],
       "datasourceTemplate": "rubygems",
       "versioningTemplate": "ruby"
+    },
+    {
+      "customType": "regex",
+      "description": "Update Ruby versions in GitHub Actions matrix entries (which the github-actions manager doesn't see), marked with a `# renovate: datasource=ruby-version depName=ruby` comment",
+      "managerFilePatterns": [
+        "/(^|/)\\.github/workflows/[^/]+\\.ya?ml$/",
+        "/(^|/)_github/workflows/[^/]+\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "ruby_version:\\s*['\"]?(?<currentValue>\\d+\\.\\d+\\.\\d+)['\"]?\\s*#\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+)\\s+depName=(?<depName>[\\w.-]+)"
+      ],
+      "versioningTemplate": "ruby"
     }
   ],
   "packageRules": [
@@ -35,6 +47,35 @@
         "custom.regex"
       ],
       "rangeStrategy": "replace"
+    },
+    {
+      "description": "Offer Ruby patch updates separately from minor ones. Otherwise a pinned 3.2.x is only offered the newest non-major Ruby (e.g. 3.4.x), which the next rule disables, so it never gets a 3.2 patch release",
+      "matchDatasources": [
+        "ruby-version"
+      ],
+      "separateMinorPatch": true
+    },
+    {
+      "description": "Only take patch updates for Ruby itself. CI Ruby versions are pinned per major.minor on purpose (e.g. 3.2 is the Ruby the OpenVox 8 agent ships, 4.0 is OpenVox 9's), so moving to a new minor or major is a deliberate change made by hand",
+      "matchDatasources": [
+        "ruby-version"
+      ],
+      "matchUpdateTypes": [
+        "major",
+        "minor"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Group Ruby patch updates into one PR per repository",
+      "matchDatasources": [
+        "ruby-version"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "groupName": "Ruby patch versions",
+      "groupSlug": "ruby"
     }
   ]
 }
