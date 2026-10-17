@@ -4,22 +4,48 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Update environment variable defaults",
+      "description": "Update pessimistic (`~>`) environment variable defaults in Gemfiles. The version number alone is the current value, so the update is a plain version replacement that keeps the `~>`",
       "managerFilePatterns": [
         "/(^|/)Gemfile(\\.(local|project))?$/"
       ],
       "matchStrings": [
-        "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)(?:\\s+versioning=(?<versioning>\\S+))?\\s+.*?['\"](?<depName>[\\w_-]+)['\"].*?['\"](?<currentValue>(?:=|~>|<)?\\s*\\d+(?:\\.\\d+)*)['\"]"
+        "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)(?:\\s+versioning=(?<versioning>\\S+))?\\s+.*?['\"](?<depName>[\\w_-]+)['\"].*?['\"]~>\\s*(?<currentValue>\\d+(?<minorPart>\\.\\d+)?(?<patchPart>\\.\\d+)?)['\"]"
+      ],
+      "extractVersionTemplate": "^v?(?<version>\\d+{{#if minorPart}}\\.\\d+{{/if}}{{#if patchPart}}\\.\\d+{{/if}})(?:\\.\\d+)*$",
+      "depTypeTemplate": "pessimistic"
+    },
+    {
+      "customType": "regex",
+      "description": "Update exact (`'1.2.3'` or `'= 1.2.3'`) environment variable defaults in Gemfiles",
+      "managerFilePatterns": [
+        "/(^|/)Gemfile(\\.(local|project))?$/"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)(?:\\s+versioning=(?<versioning>\\S+))?\\s+.*?['\"](?<depName>[\\w_-]+)['\"].*?['\"](?<currentValue>(?:=\\s*)?\\d+(?:\\.\\d+)*)['\"]"
       ]
     },
     {
       "customType": "regex",
-      "description": "Update gemspec dependencies",
+      "description": "Update pessimistic (`~>`) gemspec dependencies",
       "managerFilePatterns": [
         "/\\.gemspec$/"
       ],
       "matchStrings": [
-        "\\.add(?:_runtime|_development)?_dependency\\s+['\"](?<depName>[\\w_-]+)['\"].*?['\"](?<currentValue>(?:=|~>|<)?\\s*\\d+(?:\\.\\d+)*)['\"]"
+        "\\.add(?:_runtime|_development)?_dependency[\\s(]+['\"](?<depName>[\\w_-]+)['\"].*?['\"]~>\\s*(?<currentValue>\\d+(?<minorPart>\\.\\d+)?(?<patchPart>\\.\\d+)?)['\"]"
+      ],
+      "datasourceTemplate": "rubygems",
+      "versioningTemplate": "ruby",
+      "extractVersionTemplate": "^v?(?<version>\\d+{{#if minorPart}}\\.\\d+{{/if}}{{#if patchPart}}\\.\\d+{{/if}})(?:\\.\\d+)*$",
+      "depTypeTemplate": "pessimistic"
+    },
+    {
+      "customType": "regex",
+      "description": "Update exact (`'1.2.3'` or `'= 1.2.3'`) gemspec dependencies",
+      "managerFilePatterns": [
+        "/\\.gemspec$/"
+      ],
+      "matchStrings": [
+        "\\.add(?:_runtime|_development)?_dependency[\\s(]+['\"](?<depName>[\\w_-]+)['\"].*?['\"](?<currentValue>(?:=\\s*)?\\d+(?:\\.\\d+)*)['\"]"
       ],
       "datasourceTemplate": "rubygems",
       "versioningTemplate": "ruby"
@@ -39,14 +65,33 @@
   ],
   "packageRules": [
     {
-      "description": "Applies \":preserveSemverRanges\" to the custom manager above. See: https://github.com/renovatebot/renovate/discussions/28090",
-      "matchDatasources": [
-        "rubygems"
-      ],
+      "description": "`~> X.Y` already allows newer X.Y releases, so only offer a new major (e.g. `~> 8.0` -> `~> 9.1`)",
       "matchManagers": [
         "custom.regex"
       ],
-      "rangeStrategy": "replace"
+      "matchDepTypes": [
+        "pessimistic"
+      ],
+      "matchCurrentValue": "/^\\d+\\.\\d+$/",
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "`~> X.Y.Z` already allows newer X.Y.Z releases, so only offer a new minor or major (e.g. `~> 4.0.0` -> `~> 4.1.2`)",
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchDepTypes": [
+        "pessimistic"
+      ],
+      "matchCurrentValue": "/^\\d+\\.\\d+\\.\\d+$/",
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "enabled": false
     },
     {
       "description": "Offer Ruby patch updates separately from minor ones. Otherwise a pinned 3.2.x is only offered the newest non-major Ruby (e.g. 3.4.x), which the next rule disables, so it never gets a 3.2 patch release",
