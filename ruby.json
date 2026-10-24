@@ -67,15 +67,49 @@
       "enabled": false
     },
     {
-      "description": "Group Ruby patch updates into one PR per repository",
+      "description": "Group Ruby patch updates, and the ruby/setup-ruby updates they depend on, into one PR per repository",
       "matchDatasources": [
         "ruby-version"
       ],
       "matchUpdateTypes": [
         "patch"
       ],
-      "groupName": "Ruby patch versions",
+      "groupName": "Ruby and setup-ruby",
       "groupSlug": "ruby"
+    },
+    {
+      "description": "Put ruby/setup-ruby in the same PR as Ruby patch updates. CI can only use a new Ruby once setup-ruby supports it, so a Ruby bump must never be merged ahead of the setup-ruby update it needs. The slug is `patch-ruby` because `separateMinorPatch` makes Renovate prefix the Ruby patch group's slug with `patch-`, and setup-ruby's updates must land on that same `renovate/patch-ruby` branch",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "ruby/setup-ruby"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pinDigest"
+      ],
+      "groupName": "Ruby and setup-ruby",
+      "groupSlug": "patch-ruby"
+    },
+    {
+      "description": "setup-ruby is the code CI trusts to install Ruby, so give each release time to be checked before it's used. This must stay shorter than the ruby-version wait below",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "ruby/setup-ruby"
+      ],
+      "minimumReleaseAge": "2 days"
+    },
+    {
+      "description": "Hold Ruby a day longer than setup-ruby, so the setup-ruby release that supports it is already in the group PR when the Ruby bump arrives. ruby-lang.org gives only a release date, so this wait counts from midnight UTC; a release late in the UTC day can still arrive a few hours before setup-ruby support and fail CI until setup-ruby catches up",
+      "matchDatasources": [
+        "ruby-version"
+      ],
+      "minimumReleaseAge": "3 days"
     }
   ]
 }

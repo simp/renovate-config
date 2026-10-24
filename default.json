@@ -13,5 +13,19 @@
     "**/tests/**",
     "**/__fixtures__/**",
     "**/fixtures/**"
+  ],
+  "minimumReleaseAge": "3 days",
+  "osvVulnerabilityAlerts": true,
+  "packageRules": [
+    {
+      "description": "Our own actions and reusable workflows have the same maintainers as the repos that use them, so their releases are used without waiting",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "simp/**"
+      ],
+      "minimumReleaseAge": null
+    }
   ]
 }
