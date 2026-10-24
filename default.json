@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "config:best-practices"
   ],
   "ignorePaths": [
     "**/node_modules/**",
@@ -13,5 +13,20 @@
     "**/tests/**",
     "**/__fixtures__/**",
     "**/fixtures/**"
+  ],
+  "minimumReleaseAge": "3 days",
+  "osvVulnerabilityAlerts": true,
+  "packageRules": [
+    {
+      "description": "Our own actions and reusable workflows have the same maintainers as the repos that use them, so they keep their tag references and their releases are used without waiting",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "simp/**"
+      ],
+      "minimumReleaseAge": null,
+      "pinDigests": false
+    }
   ]
 }
